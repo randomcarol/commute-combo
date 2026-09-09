@@ -1,0 +1,43 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*api-key*
+*apikey*
+config.local.*
+run-live.local.sh
+
+# Python / JavaScript caches
+__pycache__/
+*.py[cod]
+node_modules/
+.pytest_cache/
+coverage/
+
+# Local databases and raw events
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.jsonl
+data/analytics/
+backend/data/
+local-data/
+
+# Local address samples and experiment source files
+data/private/
+data/local/
+*address*.local.*
+*addresses*.local.*
+*case-source*.local.*
+
+# Editors and operating-system files
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+.idea/
+.vscode/
+

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>房补通勤组合搜索器 · 数据看板</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <h1>自测实验与产品指标</h1>
+          <p class="hero-body">把“系统找到路线”“规则合规”“地图复核通过”拆开度量，支持按环境筛选和匿名 CASE 汇总。</p>
+          <div class="hero-tags">
+            <span>脱敏统计</span>
+            <span>纯 HTML 表格</span>
+            <span>单人重复任务实验</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>整体概览</h2>
+            <p>核心指标为“有效测距完成率”，错误合规率是护栏指标。</p>
+          </div>
+          <label class="stats-filter">数据环境
+            <select id="stats-environment">
+              <option value="self_test,prod">作者自测 + 未来正式（默认）</option>
+              <option value="self_test">仅作者自测</option>
+              <option value="prod">仅未来正式</option>
+              <option value="dev">仅开发调试</option>
+              <option value="test">仅自动测试</option>
+              <option value="demo">仅演示数据</option>
+              <option value="dev,test,demo,self_test,prod">全部环境</option>
+            </select>
+          </label>
+          <div id="stats-banner" class="source-banner"></div>
+          <div id="stats-cards" class="metrics-grid"></div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading"><h2>地址样本基准测试</h2><p>同一批匿名地址做人工与工具配对比较；不足 20 个案例时固定提示“样本量较小，仅用于探索性验证”。</p></div>
+          <div id="experiment-cards" class="metrics-grid experiment-metrics"></div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>路线模板分布</h2>
+            <p>统计每种模板有多少次命中，以及命中时的平均时长。</p>
+          </div>
+          <div class="stats-table-wrap">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>模板</th>
+                  <th>命中次数</th>
+                  <th>命中率</th>
+                  <th>平均时长</th>
+                </tr>
+              </thead>
+              <tbody id="route-distribution-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>Provider 分布</h2>
+            <p>看当前最优结果主要来自哪个地图源，判断是否需要继续压高德 / 百度 / 腾讯的 fallback 策略。</p>
+          </div>
+          <div class="stats-table-wrap">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>地图源</th>
+                  <th>命中次数</th>
+                  <th>占比</th>
+                </tr>
+              </thead>
+              <tbody id="provider-breakdown-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>反馈主题</h2>
+            <p>当前为作者自测反馈主题，不表述为真实用户结论。</p>
+          </div>
+          <div class="stats-table-wrap">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>主题</th>
+                  <th>次数</th>
+                </tr>
+              </thead>
+              <tbody id="feedback-theme-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>产品下一步建议</h2>
+            <p>把数据翻成下一轮迭代优先级，避免只看报表不行动。</p>
+          </div>
+          <div id="recommendation-list" class="insight-list"></div>
+        </section>
+      </main>
+
+      <section class="panel detail-panel">
+        <div class="panel-heading">
+          <h2>最近 10 次关联搜索</h2>
+          <p>只显示 request_id 短码和环境，不显示完整地址。</p>
+        </div>
+        <div class="stats-table-wrap">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>请求短码</th>
+                <th>环境</th>
+                <th>模板</th>
+                <th>总时长</th>
+                <th>是否合规</th>
+              </tr>
+            </thead>
+            <tbody id="recent-searches-body"></tbody>
+          </table>
+        </div>
+        <p class="stats-footnote">“有路线”不等于“符合房补规则”；只有系统合规、地图一致且截图可用，才计入有效测距完成。</p>
+      </section>
+
+      <footer class="page-footer">
+        <span>v0.4.0 · 实验版 · 非正式生产工具</span>
+        <a href="/">返回搜索首页</a>
+      </footer>
+    </div>
+
+    <script type="module" src="./stats.js"></script>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>房补通勤组合搜索器 · 运营看板</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <h1>试用期运营看板</h1>
+          <p class="hero-body">查看搜索次数、空结果率、合规命中率和模板分布。当前页面只展示脱敏后的聚合统计。</p>
+          <div class="hero-tags">
+            <span>内部使用</span>
+            <span>脱敏统计</span>
+            <span>朋友试用阶段</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace metrics-workspace">
+        <section class="panel query-panel">
+          <div class="panel-heading">
+            <h2>看板访问</h2>
+            <p>输入 metrics token 后读取当前部署环境的统计数据。</p>
+          </div>
+          <form id="metrics-form" class="query-form">
+            <label>
+              <span>Metrics Token</span>
+              <input id="metrics-token" name="metrics-token" placeholder="输入内部 metrics token" autocomplete="off" />
+            </label>
+            <button type="submit" class="primary-button">读取统计</button>
+          </form>
+          <section class="privacy-note" aria-label="看板说明">
+            <h3>看板说明</h3>
+            <p>这个页面不会展示完整地址原文，只显示搜索量、命中率和模板分布等脱敏统计，适合朋友试用阶段快速看数据。</p>
+          </section>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>指标概览</h2>
+            <p>先看整体量级和命中率，再看最优模板分布。</p>
+          </div>
+          <div id="metrics-banner" class="source-banner"></div>
+          <div id="metrics-cards" class="metrics-grid"></div>
+          <section class="metrics-panel">
+            <div class="panel-heading compact">
+              <h3>最优模板分布</h3>
+              <p>统计每次搜索最终排在首位的模板，便于判断骑行、步行还是混合方案更常命中。</p>
+            </div>
+            <div id="template-breakdown" class="template-breakdown"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./metrics.js"></script>
+  </body>
+</html>

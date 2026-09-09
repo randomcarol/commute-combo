@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>房补通勤组合搜索器</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <h1>房补通勤组合搜索器</h1>
+          <p class="hero-body">
+            比较原始地点、门口 / 楼栋别名、地铁出入口与合法通勤组合，找到可回到地图 App 复核的房补测距方案。
+          </p>
+          <div class="hero-tags">
+            <span>高德主算路</span>
+            <span>自动识别地铁站</span>
+            <span>输出截图建议</span>
+            <span>单人重复任务实验</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel query-panel">
+          <div class="panel-heading">
+            <h2>搜索条件</h2>
+            <p>输入公司地点和租房小区，系统会先帮你匹配高德地点，再自动搜索最优通勤方案。</p>
+          </div>
+
+          <form id="search-form" class="query-form">
+            <label class="search-field">
+              <span>公司地点</span>
+              <input id="office" name="office" placeholder="输入公司地点或办公楼名称" autocomplete="off" />
+              <div id="office-suggestions" class="suggestion-list"></div>
+            </label>
+
+            <label class="search-field">
+              <span>租房小区</span>
+              <input id="home" name="home" placeholder="输入租房小区名称" autocomplete="off" />
+              <div id="home-suggestions" class="suggestion-list"></div>
+            </label>
+            <p class="field-help">输入时会出现高德候选地点。首版只使用高德主算路，自动识别 POI 与附近地铁站。</p>
+
+            <div class="rule-grid">
+              <label>
+                <span>步行上限</span>
+                <input id="walk-limit" type="number" min="1" value="30" />
+              </label>
+              <label>
+                <span>骑行 / 地铁上限</span>
+                <input id="bike-subway-limit" type="number" min="1" value="20" />
+              </label>
+              <label>
+                <span>分段混合上限</span>
+                <input id="mixed-limit" type="number" min="1" value="20" />
+              </label>
+              <label>
+                <span>数据环境</span>
+                <select id="environment">
+                  <option value="dev">开发调试 dev</option>
+                  <option value="self_test">作者自测 self_test</option>
+                  <option value="demo">演示 demo</option>
+                  <option value="prod">未来正式 prod</option>
+                </select>
+              </label>
+            </div>
+            <p class="field-help">规则版本 commute-r1.0：仅允许纯步行、纯骑行、地图端到端地铁、骑行 → 地铁 → 骑行。余量不超过 2 分钟的方案标为“临界合规”。</p>
+
+            <div class="search-actions">
+              <button id="search-submit" type="submit" class="primary-button">开始搜索最优通勤组合</button>
+              <button id="search-cancel" type="button" class="secondary-button" disabled>停止搜索</button>
+            </div>
+          </form>
+
+          <section class="privacy-note" aria-label="隐私与数据说明">
+            <h3>隐私与数据说明</h3>
+            <p>当前版本不会存储完整地址原文到埋点；脱敏后的搜索统计只保存不可逆哈希。原始埋点、反馈数据库和实验记录默认写入不会提交 GitHub 的 <code>local-data/</code>。</p>
+          </section>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-heading">
+            <h2>搜索结果</h2>
+            <p>先看最短合规方案，再展开看每段如何拼出来。</p>
+          </div>
+
+          <div id="source-banner" class="source-banner"></div>
+          <div id="summary-card" class="summary-card"></div>
+          <div id="result-list" class="result-list"></div>
+        </section>
+      </main>
+
+      <section class="panel detail-panel">
+        <div class="panel-heading">
+          <h2>方案详情</h2>
+          <p>分段时长、推荐截图思路和路径拼接都放在这里。</p>
+        </div>
+        <div id="detail-view" class="detail-view"></div>
+        <section id="feedback-panel" class="feedback-panel" aria-label="结果反馈">
+          <div class="feedback-row">
+            <strong>这组结果对你有帮助吗？</strong>
+            <div class="feedback-actions">
+              <button id="feedback-helpful" type="button" class="feedback-button">有帮助</button>
+              <button id="feedback-unhelpful" type="button" class="feedback-button alt">没帮到</button>
+            </div>
+          </div>
+          <div id="feedback-extra" class="feedback-extra hidden">
+            <label for="feedback-note">具体还差什么？</label>
+            <textarea id="feedback-note" placeholder="例如：门口识别不准、地铁站选错、没有搜出更短方案"></textarea>
+          </div>
+          <div class="feedback-submit-row">
+            <button id="feedback-submit" type="button" class="primary-button small">提交反馈</button>
+            <p id="feedback-status" class="feedback-status">搜索完成后可以直接反馈，帮助后续优化。</p>
+          </div>
+        </section>
+        <section id="review-panel" class="feedback-panel review-panel disabled" aria-label="结果复核">
+          <div class="panel-heading compact">
+            <h3>地图 App 复核</h3>
+            <p>搜索有结果不等于符合房补规则；请回到高德等地图核对后记录。</p>
+          </div>
+          <div id="review-outcomes" class="review-options">
+            <label><input type="checkbox" value="map_consistent" /> 与地图 App 复核一致</label>
+            <label><input type="checkbox" value="tool_shorter" /> 工具结果偏短</label>
+            <label><input type="checkbox" value="tool_longer" /> 工具结果偏长</label>
+            <label><input type="checkbox" value="station_or_exit_wrong" /> 地铁站或出入口错误</label>
+            <label><input type="checkbox" value="alias_effective" /> 门口 / 楼栋别名有效</label>
+            <label><input type="checkbox" value="screenshot_usable" /> 截图方案可以使用</label>
+            <label><input type="checkbox" value="no_compliant_plan" /> 最终未找到合规方案</label>
+          </div>
+          <div class="review-fields">
+            <label>实际复核分钟数<input id="review-minutes" type="number" min="0" placeholder="可选" /></label>
+            <label>问题分类<select id="review-issue"><option value="none">无 / 未分类</option><option value="duration">时长偏差</option><option value="station">站点 / 出入口</option><option value="alias">门口 / 楼栋别名</option><option value="screenshot">截图链路</option><option value="compliance">合规判断</option></select></label>
+          </div>
+          <label class="review-note">复核备注（不要填写完整地址）<textarea id="review-note" maxlength="300" placeholder="只记录问题现象和判断依据"></textarea></label>
+          <div class="feedback-submit-row"><button id="review-submit" type="button" class="primary-button small">保存复核</button><p id="review-status" class="feedback-status"></p></div>
+        </section>
+      </section>
+
+      <section class="panel experiment-panel">
+        <details>
+          <summary><strong>实验模式：记录 CASE-001 这类匿名地址样本</strong></summary>
+          <p class="field-help">方法：同一批地址做人工搜索与工具搜索配对比较。这里不采集真实地址；重复提交同一 CASE 时，汇总使用最新记录。</p>
+          <form id="experiment-form" class="experiment-form">
+            <input type="hidden" name="request_id" />
+            <input type="hidden" name="environment" />
+            <input type="hidden" name="data_source" />
+            <label>测试日期<input name="test_date" type="date" required /></label>
+            <label>测试时段<select name="time_period" required><option value="weekday_peak">工作日高峰</option><option value="weekday_offpeak">工作日平峰</option><option value="weekend">周末</option></select></label>
+            <label>匿名案例编号<input name="case_id" pattern="CASE-[0-9]{3,6}" placeholder="CASE-001" required /></label>
+            <label>规则版本<input name="rule_version" value="commute-r1.0" readonly /></label>
+            <label>人工搜索用时（秒）<input name="manual_search_seconds" type="number" min="0" step="0.1" required /></label>
+            <label>人工尝试次数<input name="manual_attempt_count" type="number" min="0" required /></label>
+            <label>人工最优时间（分钟）<input name="manual_best_minutes" type="number" min="0" step="0.1" /></label>
+            <label>工具搜索用时（秒）<input name="tool_search_seconds" type="number" min="0" step="0.01" /></label>
+            <label>工具最优时间（分钟）<input name="tool_best_minutes" type="number" min="0" step="0.1" /></label>
+            <fieldset><legend>实验判断</legend><label><input name="tool_search_success" type="checkbox" /> 实时搜索成功</label><label><input name="found_compliant_plan" type="checkbox" /> 找到合规方案</label><label><input name="matches_manual" type="checkbox" /> 与人工结果一致</label><label><input name="top1_valid" type="checkbox" /> Top-1 有效</label><label><input name="alias_improved" type="checkbox" /> 门口 / 楼栋 / 出入口带来改善</label><label><input name="false_compliance" type="checkbox" /> 错误合规</label></fieldset>
+            <label class="wide">备注（不要填写完整地址）<textarea name="note" maxlength="300"></textarea></label>
+            <button type="submit" class="primary-button small">保存脱敏实验记录</button>
+          </form>
+          <p id="experiment-status" class="feedback-status">搜索完成后会自动带入工具用时、最优时间和 request_id。</p>
+        </details>
+      </section>
+
+      <footer class="page-footer">
+        <span>v0.4.0 · 实验版 · 非正式生产工具</span>
+        <a href="/stats">查看试用数据看板</a>
+      </footer>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
