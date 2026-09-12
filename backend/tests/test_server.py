@@ -1,7 +1,9 @@
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from backend.server import (
@@ -125,14 +127,14 @@ class ServerApiTests(unittest.TestCase):
         self.assertEqual(payload["suggestions"][0]["name"], "中海雅园")
 
     def test_server_script_can_bootstrap_package_imports_when_run_directly(self):
-        project_root = "/Users/dengzhilei/Documents/Codex/2026-08-01/ai"
-        server_path = f"{project_root}/backend/server.py"
+        project_root = Path(__file__).resolve().parents[2]
+        server_path = project_root / "backend" / "server.py"
         env = dict(os.environ)
         env["COMMUTE_SERVER_IMPORT_ONLY"] = "1"
 
         result = subprocess.run(
             [sys.executable, server_path],
-            cwd="/private/tmp",
+            cwd=tempfile.gettempdir(),
             env=env,
             capture_output=True,
             text=True,
