@@ -1,6 +1,10 @@
-# Commute Combo｜房补通勤组合搜索器
+# Commute Combo · Housing Allowance Route Planner
+
+中文名：房补通勤组合搜索器
 
 > 输入公司地点、候选房源和房补规则，自动比较原始地点、同名门口 / 楼栋别名、地铁出入口与合法通勤组合，输出可回到地图 App 复核和截图的候选方案。
+
+这是一个 AI 辅助完成的产品工程项目：我负责问题定义、规则建模、指标口径、隐私边界与验收，AI 用于加速方案探索、实现和测试。运行时核心是可解释的地图检索与确定性规则引擎，不把普通规则包装成大模型能力。
 
 ## 用户问题
 
@@ -41,6 +45,8 @@
 - `v0.2`：原始点与同名门口 / 楼栋别名比较。
 - `v0.3`：反馈、基础看板、分段路线偏差提示。
 - `v0.4.0`：统一规则版本、环境隔离埋点、结果复核、匿名配对实验和脱敏汇总。
+
+源码只保留下 `v0.4.0` 的可验证快照，因此仓库仅为该版本创建代码标签；`v0.1`–`v0.3` 的变化来自原项目中保留下来的版本日志，没有倒推或伪造历史代码。详见 [开发历史](DEVELOPMENT_HISTORY.md)。
 
 ## 实验与指标
 
@@ -92,3 +98,5 @@ PYTHONDONTWRITEBYTECODE=1 COMMUTE_ENVIRONMENT=test python3 -m unittest discover 
 - [指标与埋点](docs/portfolio/04-metrics-and-tracking.md)
 - [实验协议](docs/portfolio/05-experiment-protocol.md)
 - [迭代报告模板](docs/portfolio/06-iteration-report-template.md)
+- [AI 协作与能力边界](docs/AI-DEVELOPMENT.md)
+- [可验证开发历史](DEVELOPMENT_HISTORY.md)
